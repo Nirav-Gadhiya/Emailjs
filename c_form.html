@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Form with EmailJS</title>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+   
+</head>
+<body>
+    <h1>Contact Us</h1>
+    <form id="contact-form">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="message">Message:</label><br>
+        <textarea id="message" name="message" rows="4" required></textarea><br><br>
+
+        <button type="submit">Send</button>
+    </form>
+
+    <p id="status"></p>
+
+    <script>
+      // Fetch configuration from config.json
+        fetch("config.json")
+        .then(response => response.json())
+        .then(config => {
+            // Initialize EmailJS with the public key
+            emailjs.init(config.public_key);
+
+            const form = document.getElementById("contact-form");
+            const status = document.getElementById("status");
+
+            form.addEventListener("submit", function (event) {
+                event.preventDefault(); // Prevent default form submission
+
+                // Collect form data
+                const formData = {
+                    from_name: document.getElementById("name").value,
+                    from_email: document.getElementById("email").value,
+                    message: document.getElementById("message").value,
+                };
+
+                // Send the email
+                emailjs.send(config.service_id, config.template_id, formData)
+                    .then(response => {
+                        console.log("Email sent successfully!", response);
+                        status.textContent = "Your message has been sent successfully!";
+                        status.style.color = "green";
+                        form.reset(); // Reset the form fields
+                    })
+                    .catch(error => {
+                        console.error("Failed to send email:", error);
+                        status.textContent = "Failed to send your message. Please try again.";
+                        status.style.color = "red";
+                    });
+            });
+        })
+        .catch(error => {
+            console.error("Failed to load configuration:", error);
+            const status = document.getElementById("status");
+            status.textContent = "Failed to initialize the email service.";
+            status.style.color = "red";
+        });
+
+    </script>
+</body>
+</html>
